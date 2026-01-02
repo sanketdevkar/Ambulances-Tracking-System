@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +9,10 @@
     <link rel="stylesheet" href="dashboard-styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
+
 <body>
-    <div id="notification" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#2ecc71;color:#fff;padding:1rem 2rem;border-radius:6px;z-index:2000;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+    <div id="notification"
+        style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#2ecc71;color:#fff;padding:1rem 2rem;border-radius:6px;z-index:2000;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
         <!-- Notification message will go here -->
     </div>
     <div class="container">
@@ -29,6 +32,14 @@
             </section>
         </main>
     </div>
+
+    <footer style="text-align: center; margin-top: 30px; padding: 20px;">
+        <p>Developed by <strong>Sanket Devkar</strong></p>
+        <a href="https://www.linkedin.com/in/sanketdevkar/" target="_blank"
+            style="text-decoration: none; color: #0077b5; font-weight: bold;">
+            Connect on LinkedIn 🔗
+        </a>
+    </footer>
     <!-- Ambulance Details Modal -->
     <div id="ambulanceModal" class="modal" style="display:none;">
         <div class="modal-content">
@@ -45,158 +56,158 @@
         </div>
     </div>
     <script>
-    // Binary Search Tree implementation for ambulance distance
-    class Node {
-        constructor(ambulance) {
-            this.ambulance = ambulance;
-            this.left = null;
-            this.right = null;
-        }
-    }
-
-    class AmbulanceBST {
-        constructor() {
-            this.root = null;
+        // Binary Search Tree implementation for ambulance distance
+        class Node {
+            constructor(ambulance) {
+                this.ambulance = ambulance;
+                this.left = null;
+                this.right = null;
+            }
         }
 
-        insert(ambulance) {
-            this.root = this._insertRec(this.root, ambulance);
-        }
-
-        _insertRec(node, ambulance) {
-            if (node === null) {
-                return new Node(ambulance);
+        class AmbulanceBST {
+            constructor() {
+                this.root = null;
             }
 
-            if (ambulance.distance < node.ambulance.distance) {
-                node.left = this._insertRec(node.left, ambulance);
-            } else {
-                node.right = this._insertRec(node.right, ambulance);
+            insert(ambulance) {
+                this.root = this._insertRec(this.root, ambulance);
             }
 
-            return node;
+            _insertRec(node, ambulance) {
+                if (node === null) {
+                    return new Node(ambulance);
+                }
+
+                if (ambulance.distance < node.ambulance.distance) {
+                    node.left = this._insertRec(node.left, ambulance);
+                } else {
+                    node.right = this._insertRec(node.right, ambulance);
+                }
+
+                return node;
+            }
+
+            // Get all ambulances in sorted order (in-order traversal)
+            getSortedAmbulances() {
+                const result = [];
+                this._inOrderTraversal(this.root, result);
+                return result;
+            }
+
+            _inOrderTraversal(node, result) {
+                if (node === null) return;
+
+                this._inOrderTraversal(node.left, result);
+                result.push(node.ambulance);
+                this._inOrderTraversal(node.right, result);
+            }
         }
 
-        // Get all ambulances in sorted order (in-order traversal)
-        getSortedAmbulances() {
-            const result = [];
-            this._inOrderTraversal(this.root, result);
-            return result;
+        // Improved Haversine formula with better accuracy for kilometers
+        function haversine(lat1, lon1, lat2, lon2) {
+            // Input validation
+            if (!lat1 || !lon1 || !lat2 || !lon2) {
+                return Infinity;
+            }
+
+            // Convert to numbers and validate
+            lat1 = parseFloat(lat1);
+            lon1 = parseFloat(lon1);
+            lat2 = parseFloat(lat2);
+            lon2 = parseFloat(lon2);
+
+            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
+                return Infinity;
+            }
+
+            // Validate coordinate ranges
+            if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90 ||
+                lon1 < -180 || lon1 > 180 || lon2 < -180 || lon2 > 180) {
+                return Infinity;
+            }
+
+            function toRad(x) {
+                return x * Math.PI / 180;
+            }
+
+            // Earth's radius in kilometers (more precise value)
+            const R = 6371.0088;
+
+            // Calculate differences
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+
+            // More precise calculation using Vincenty formula
+            const lat1Rad = toRad(lat1);
+            const lat2Rad = toRad(lat2);
+
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            let distance = R * c;
+
+            // Additional check for very small distances
+            if (distance < 0.01) {
+                distance = 0;
+            }
+
+            // Round to 2 decimal places for display
+            return Math.round(distance * 100) / 100;
         }
 
-        _inOrderTraversal(node, result) {
-            if (node === null) return;
-            
-            this._inOrderTraversal(node.left, result);
-            result.push(node.ambulance);
-            this._inOrderTraversal(node.right, result);
-        }
-    }
+        // Load available ambulances from localStorage and show nearest first using BST
+        function loadAvailableAmbulances(userLat = null, userLng = null) {
+            const listDiv = document.getElementById('availableAmbulanceList');
+            listDiv.innerHTML = '';
+            const ambulances = JSON.parse(localStorage.getItem('ambulances') || '[]');
+            let available = ambulances.filter(a => a.status === 'Available');
 
-    // Improved Haversine formula with better accuracy for kilometers
-    function haversine(lat1, lon1, lat2, lon2) {
-        // Input validation
-        if (!lat1 || !lon1 || !lat2 || !lon2) {
-            return Infinity;
-        }
+            // Use BST if user location is known
+            if (userLat !== null && userLng !== null) {
+                const bst = new AmbulanceBST();
+                available.forEach(a => {
+                    if (a.latitude && a.longitude) {
+                        try {
+                            // Convert coordinates to numbers before calculation
+                            const ambLat = parseFloat(a.latitude);
+                            const ambLng = parseFloat(a.longitude);
+                            const userLatNum = parseFloat(userLat);
+                            const userLngNum = parseFloat(userLng);
 
-        // Convert to numbers and validate
-        lat1 = parseFloat(lat1);
-        lon1 = parseFloat(lon1);
-        lat2 = parseFloat(lat2);
-        lon2 = parseFloat(lon2);
-
-        if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
-            return Infinity;
-        }
-
-        // Validate coordinate ranges
-        if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90 ||
-            lon1 < -180 || lon1 > 180 || lon2 < -180 || lon2 > 180) {
-            return Infinity;
-        }
-
-        function toRad(x) { 
-            return x * Math.PI / 180; 
-        }
-
-        // Earth's radius in kilometers (more precise value)
-        const R = 6371.0088;
-
-        // Calculate differences
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-
-        // More precise calculation using Vincenty formula
-        const lat1Rad = toRad(lat1);
-        const lat2Rad = toRad(lat2);
-
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                 Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                 Math.sin(dLon/2) * Math.sin(dLon/2);
-        
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        let distance = R * c;
-
-        // Additional check for very small distances
-        if (distance < 0.01) {
-            distance = 0;
-        }
-
-        // Round to 2 decimal places for display
-        return Math.round(distance * 100) / 100;
-    }
-
-    // Load available ambulances from localStorage and show nearest first using BST
-    function loadAvailableAmbulances(userLat = null, userLng = null) {
-        const listDiv = document.getElementById('availableAmbulanceList');
-        listDiv.innerHTML = '';
-        const ambulances = JSON.parse(localStorage.getItem('ambulances') || '[]');
-        let available = ambulances.filter(a => a.status === 'Available');
-
-        // Use BST if user location is known
-        if (userLat !== null && userLng !== null) {
-            const bst = new AmbulanceBST();
-            available.forEach(a => {
-                if (a.latitude && a.longitude) {
-                    try {
-                        // Convert coordinates to numbers before calculation
-                        const ambLat = parseFloat(a.latitude);
-                        const ambLng = parseFloat(a.longitude);
-                        const userLatNum = parseFloat(userLat);
-                        const userLngNum = parseFloat(userLng);
-
-                        if (!isNaN(ambLat) && !isNaN(ambLng) && 
-                            !isNaN(userLatNum) && !isNaN(userLngNum)) {
-                            a.distance = haversine(userLatNum, userLngNum, ambLat, ambLng);
-                            // Only insert if distance is valid and reasonable
-                            if (a.distance !== Infinity && a.distance >= 0 && a.distance < 10000) {
-                                bst.insert(a);
+                            if (!isNaN(ambLat) && !isNaN(ambLng) &&
+                                !isNaN(userLatNum) && !isNaN(userLngNum)) {
+                                a.distance = haversine(userLatNum, userLngNum, ambLat, ambLng);
+                                // Only insert if distance is valid and reasonable
+                                if (a.distance !== Infinity && a.distance >= 0 && a.distance < 10000) {
+                                    bst.insert(a);
+                                }
+                            } else {
+                                a.distance = Infinity;
                             }
-                        } else {
+                        } catch (error) {
+                            console.error('Error calculating distance:', error);
                             a.distance = Infinity;
                         }
-                    } catch (error) {
-                        console.error('Error calculating distance:', error);
+                    } else {
                         a.distance = Infinity;
                     }
-                } else {
-                    a.distance = Infinity;
-                }
-            });
-            // Get ambulances in sorted order
-            available = bst.getSortedAmbulances();
-        }
+                });
+                // Get ambulances in sorted order
+                available = bst.getSortedAmbulances();
+            }
 
-        if (available.length === 0) {
-            listDiv.innerHTML = '<p>No ambulances are currently available.</p>';
-            return;
-        }
+            if (available.length === 0) {
+                listDiv.innerHTML = '<p>No ambulances are currently available.</p>';
+                return;
+            }
 
-        available.forEach(amb => {
-            const card = document.createElement('div');
-            card.className = 'ambulance-item';
-            card.innerHTML = `
+            available.forEach(amb => {
+                const card = document.createElement('div');
+                card.className = 'ambulance-item';
+                card.innerHTML = `
                 <h4>Ambulance ${amb.id}</h4>
                 <p>Driver: ${amb.driverName}</p>
                 <p>Phone: ${amb.phoneNumber}</p>
@@ -204,88 +215,88 @@
                 <div class="location-info">
                     <p>Location: ${amb.currentLocation}</p>
                     <p class="coordinates">Coordinates: ${amb.latitude}, ${amb.longitude}</p>
-                    ${amb.distance !== undefined && amb.distance !== Infinity && amb.distance >= 0 ? 
-                        `<p><strong>Distance:</strong> ${amb.distance.toFixed(2)} km</p>` : 
+                    ${amb.distance !== undefined && amb.distance !== Infinity && amb.distance >= 0 ?
+                        `<p><strong>Distance:</strong> ${amb.distance.toFixed(2)} km</p>` :
                         '<p><strong>Distance:</strong> Unable to calculate</p>'}
                 </div>
                 <button class="add-btn" onclick="bookAmbulance('${amb.id}')">Book</button>
             `;
-            listDiv.appendChild(card);
-        });
-    }
-    // Book ambulance handler (for now, just alert)
-    function bookAmbulance(id) {
-        // Prompt for mobile number
-        let userMobile = prompt('Please enter your mobile number for this booking:');
-        if (!userMobile || !/^\d{10,15}$/.test(userMobile.trim())) {
-            alert('Please enter a valid mobile number (10-15 digits).');
-            return;
+                listDiv.appendChild(card);
+            });
         }
-        userMobile = userMobile.trim();
-        // Get ambulances from localStorage
-        const ambulances = JSON.parse(localStorage.getItem('ambulances') || '[]');
-        const amb = ambulances.find(a => a.id === id);
-        if (!amb) return;
-        // Change status to Busy
-        amb.status = 'Busy';
-        // Store user mobile with booking
-        amb.userMobile = userMobile;
-        // Store user location with booking
-        if (window.userLat && window.userLng) {
-            amb.userLat = window.userLat;
-            amb.userLng = window.userLng;
-        }
-        // Try to get user address via reverse geocoding
-        if (window.userLat && window.userLng) {
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${window.userLat}&lon=${window.userLng}`)
-                .then(response => response.json())
-                .then(data => {
-                    amb.userAddress = data.display_name || `${window.userLat}, ${window.userLng}`;
-                    finalizeBooking(amb, ambulances);
-                })
-                .catch(() => {
-                    amb.userAddress = `${window.userLat}, ${window.userLng}`;
-                    finalizeBooking(amb, ambulances);
-                });
-        } else {
-            finalizeBooking(amb, ambulances);
-        }
-    }
-    function finalizeBooking(amb, ambulances) {
-        // Ensure all coordinates are valid numbers
-        const userLat = parseFloat(amb.userLat);
-        const userLng = parseFloat(amb.userLng);
-        const ambLat = parseFloat(amb.latitude);
-        const ambLng = parseFloat(amb.longitude);
-
-        try {
-            if (!isNaN(userLat) && !isNaN(userLng) && !isNaN(ambLat) && !isNaN(ambLng)) {
-                amb.userDistance = haversine(userLat, userLng, ambLat, ambLng);
+        // Book ambulance handler (for now, just alert)
+        function bookAmbulance(id) {
+            // Prompt for mobile number
+            let userMobile = prompt('Please enter your mobile number for this booking:');
+            if (!userMobile || !/^\d{10,15}$/.test(userMobile.trim())) {
+                alert('Please enter a valid mobile number (10-15 digits).');
+                return;
+            }
+            userMobile = userMobile.trim();
+            // Get ambulances from localStorage
+            const ambulances = JSON.parse(localStorage.getItem('ambulances') || '[]');
+            const amb = ambulances.find(a => a.id === id);
+            if (!amb) return;
+            // Change status to Busy
+            amb.status = 'Busy';
+            // Store user mobile with booking
+            amb.userMobile = userMobile;
+            // Store user location with booking
+            if (window.userLat && window.userLng) {
+                amb.userLat = window.userLat;
+                amb.userLng = window.userLng;
+            }
+            // Try to get user address via reverse geocoding
+            if (window.userLat && window.userLng) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${window.userLat}&lon=${window.userLng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        amb.userAddress = data.display_name || `${window.userLat}, ${window.userLng}`;
+                        finalizeBooking(amb, ambulances);
+                    })
+                    .catch(() => {
+                        amb.userAddress = `${window.userLat}, ${window.userLng}`;
+                        finalizeBooking(amb, ambulances);
+                    });
             } else {
+                finalizeBooking(amb, ambulances);
+            }
+        }
+        function finalizeBooking(amb, ambulances) {
+            // Ensure all coordinates are valid numbers
+            const userLat = parseFloat(amb.userLat);
+            const userLng = parseFloat(amb.userLng);
+            const ambLat = parseFloat(amb.latitude);
+            const ambLng = parseFloat(amb.longitude);
+
+            try {
+                if (!isNaN(userLat) && !isNaN(userLng) && !isNaN(ambLat) && !isNaN(ambLng)) {
+                    amb.userDistance = haversine(userLat, userLng, ambLat, ambLng);
+                } else {
+                    amb.userDistance = undefined;
+                }
+            } catch (error) {
+                console.error('Error calculating distance in booking:', error);
                 amb.userDistance = undefined;
             }
-        } catch (error) {
-            console.error('Error calculating distance in booking:', error);
-            amb.userDistance = undefined;
-        }
 
-        localStorage.setItem('ambulances', JSON.stringify(ambulances));
-        // Store as currently booked
-        const bookedAmb = { ...amb };
-        localStorage.setItem('currentBookedAmbulance', JSON.stringify(bookedAmb));
-        // Show notification
-        showNotification(`Ambulance ${amb.id} booked successfully!`);
-        // Show modal with details
-        showAmbulanceModal(bookedAmb);
-        // Show persistent section
-        showCurrentBooking(bookedAmb);
-        // Refresh list
-        loadAvailableAmbulances(window.userLat, window.userLng);
-    }
-    function showAmbulanceModal(amb) {
-        const modal = document.getElementById('ambulanceModal');
-        const body = document.getElementById('modalBody');
-        body.innerHTML = `
+            localStorage.setItem('ambulances', JSON.stringify(ambulances));
+            // Store as currently booked
+            const bookedAmb = { ...amb };
+            localStorage.setItem('currentBookedAmbulance', JSON.stringify(bookedAmb));
+            // Show notification
+            showNotification(`Ambulance ${amb.id} booked successfully!`);
+            // Show modal with details
+            showAmbulanceModal(bookedAmb);
+            // Show persistent section
+            showCurrentBooking(bookedAmb);
+            // Refresh list
+            loadAvailableAmbulances(window.userLat, window.userLng);
+        }
+        function showAmbulanceModal(amb) {
+            const modal = document.getElementById('ambulanceModal');
+            const body = document.getElementById('modalBody');
+            body.innerHTML = `
             <p><strong>ID:</strong> ${amb.id}</p>
             <p><strong>Driver:</strong> ${amb.driverName}</p>
             <p><strong>Phone:</strong> ${amb.phoneNumber}</p>
@@ -297,20 +308,20 @@
             ${amb.userLat && amb.userLng ? `<p><strong>Your Coordinates:</strong> ${amb.userLat}, ${amb.userLng}</p>` : ''}
             ${amb.userDistance !== undefined && !isNaN(amb.userDistance) ? `<p><strong>Distance to Ambulance:</strong> ${amb.userDistance.toFixed(2)} km</p>` : ''}
         `;
-        modal.style.display = 'block';
-    }
-    function closeAmbulanceModal() {
-        document.getElementById('ambulanceModal').style.display = 'none';
-    }
-    // Save user location for refresh
-    function setUserLocation(lat, lng) {
-        window.userLat = lat;
-        window.userLng = lng;
-    }
-    function showCurrentBooking(amb) {
-        const section = document.getElementById('currentBookingSection');
-        const details = document.getElementById('currentBookingDetails');
-        details.innerHTML = `
+            modal.style.display = 'block';
+        }
+        function closeAmbulanceModal() {
+            document.getElementById('ambulanceModal').style.display = 'none';
+        }
+        // Save user location for refresh
+        function setUserLocation(lat, lng) {
+            window.userLat = lat;
+            window.userLng = lng;
+        }
+        function showCurrentBooking(amb) {
+            const section = document.getElementById('currentBookingSection');
+            const details = document.getElementById('currentBookingDetails');
+            details.innerHTML = `
             <p><strong>ID:</strong> ${amb.id}</p>
             <p><strong>Driver:</strong> ${amb.driverName}</p>
             <p><strong>Phone:</strong> ${amb.phoneNumber}</p>
@@ -322,39 +333,40 @@
             ${amb.userLat && amb.userLng ? `<p><strong>Your Coordinates:</strong> ${amb.userLat}, ${amb.userLng}</p>` : ''}
             ${amb.userDistance !== undefined && !isNaN(amb.userDistance) ? `<p><strong>Distance to Ambulance:</strong> ${amb.userDistance.toFixed(2)} km</p>` : ''}
         `;
-        section.style.display = 'block';
-    }
-    // On page load, show current booking if exists
-    function loadCurrentBooking() {
-        const amb = localStorage.getItem('currentBookedAmbulance');
-        if (amb) {
-            showCurrentBooking(JSON.parse(amb));
+            section.style.display = 'block';
         }
-    }
-    function showNotification(message) {
-        const notif = document.getElementById('notification');
-        notif.textContent = message;
-        notif.style.display = 'block';
-        setTimeout(() => {
-            notif.style.display = 'none';
-        }, 3000);
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    setUserLocation(position.coords.latitude, position.coords.longitude);
-                    loadAvailableAmbulances(position.coords.latitude, position.coords.longitude);
-                },
-                function(error) {
-                    loadAvailableAmbulances();
-                }
-            );
-        } else {
-            loadAvailableAmbulances();
+        // On page load, show current booking if exists
+        function loadCurrentBooking() {
+            const amb = localStorage.getItem('currentBookedAmbulance');
+            if (amb) {
+                showCurrentBooking(JSON.parse(amb));
+            }
         }
-        loadCurrentBooking();
-    });
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.style.display = 'block';
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 3000);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        setUserLocation(position.coords.latitude, position.coords.longitude);
+                        loadAvailableAmbulances(position.coords.latitude, position.coords.longitude);
+                    },
+                    function (error) {
+                        loadAvailableAmbulances();
+                    }
+                );
+            } else {
+                loadAvailableAmbulances();
+            }
+            loadCurrentBooking();
+        });
     </script>
 </body>
-</html> 
+
+</html>

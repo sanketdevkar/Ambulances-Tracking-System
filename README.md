@@ -41,4 +41,4 @@ A comprehensive web-based solution for real-time ambulance tracking, emergency b
 2. Open `index.html` in your browser.
 
 ---
-Developed by [Sanket Devkar](https://github.com/sanketdevkar)
+Developed by [Sanket Devkar](https://www.linkedin.com/in/sanketdevkar/)

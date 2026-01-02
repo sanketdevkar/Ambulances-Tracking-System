@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="dashboard-styles.css">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -25,43 +27,51 @@
             </section>
         </main>
     </div>
+
+    <footer style="text-align: center; margin-top: 30px; padding: 20px;">
+        <p>Developed by <strong>Sanket Devkar</strong></p>
+        <a href="https://www.linkedin.com/in/sanketdevkar/" target="_blank"
+            style="text-decoration: none; color: #0077b5; font-weight: bold;">
+            Connect on LinkedIn 🔗
+        </a>
+    </footer>
     <script>
-    // Haversine formula to calculate distance between two lat/lng points in km
-    function haversine(lat1, lon1, lat2, lon2) {
-        function toRad(x) { return x * Math.PI / 180; }
-        const R = 6371; // km
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-    document.getElementById('driverLoginForm').onsubmit = function(e) {
-        e.preventDefault();
-        const phone = document.getElementById('driverPhone').value.trim();
-        if (!/^\d{10,15}$/.test(phone)) {
-            showMessage('Please enter a valid phone number (10-15 digits).', false);
-            return;
+        // Haversine formula to calculate distance between two lat/lng points in km
+        function haversine(lat1, lon1, lat2, lon2) {
+            function toRad(x) { return x * Math.PI / 180; }
+            const R = 6371; // km
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
         }
-        const ambulances = JSON.parse(localStorage.getItem('ambulances') || '[]');
-        const driver = ambulances.find(a => a.phoneNumber === phone);
-        if (driver) {
-            showMessage('Login successful! Welcome, ' + driver.driverName + '.', true);
-            showAmbulanceDetails(driver);
-        } else {
-            showMessage('No driver found with this phone number.', false);
-            document.getElementById('ambulanceDetails').innerHTML = '';
+        document.getElementById('driverLoginForm').onsubmit = function (e) {
+            e.preventDefault();
+            const phone = document.getElementById('driverPhone').value.trim();
+            if (!/^\d{10,15}$/.test(phone)) {
+                showMessage('Please enter a valid phone number (10-15 digits).', false);
+                return;
+            }
+            const ambulances = JSON.parse(localStorage.getItem('ambulances') || '[]');
+            const driver = ambulances.find(a => a.phoneNumber === phone);
+            if (driver) {
+                showMessage('Login successful! Welcome, ' + driver.driverName + '.', true);
+                showAmbulanceDetails(driver);
+            } else {
+                showMessage('No driver found with this phone number.', false);
+                document.getElementById('ambulanceDetails').innerHTML = '';
+            }
+        };
+        function showMessage(msg, success) {
+            const div = document.getElementById('loginMessage');
+            div.textContent = msg;
+            div.style.color = success ? '#2ecc71' : '#e74c3c';
         }
-    };
-    function showMessage(msg, success) {
-        const div = document.getElementById('loginMessage');
-        div.textContent = msg;
-        div.style.color = success ? '#2ecc71' : '#e74c3c';
-    }
-    function showAmbulanceDetails(amb) {
-        let html = `<div class='card' style='margin-top:1.5rem;'>
+        function showAmbulanceDetails(amb) {
+            let html = `<div class='card' style='margin-top:1.5rem;'>
             <h3>Your Ambulance Details</h3>
             <p><strong>ID:</strong> ${amb.id}</p>
             <p><strong>Type:</strong> ${amb.type}</p>
@@ -69,28 +79,29 @@
             <p><strong>Current Location:</strong> ${amb.currentLocation}</p>
             <p><strong>Coordinates:</strong> ${amb.latitude}, ${amb.longitude}</p>
         `;
-        if (amb.status === 'Busy' && amb.userMobile) {
-            html += `<div class='location-info' style='margin-top:1rem;'>
+            if (amb.status === 'Busy' && amb.userMobile) {
+                html += `<div class='location-info' style='margin-top:1rem;'>
                 <h4>User Details</h4>
                 <p><strong>User Mobile:</strong> ${amb.userMobile}</p>
                 ${amb.userAddress ? `<p><strong>User Location:</strong> ${amb.userAddress}</p>` : ''}
             `;
-            // Calculate and show distance if both coordinates are available
-            if (amb.latitude && amb.longitude && amb.userLat && amb.userLng) {
-                const dist = haversine(parseFloat(amb.latitude), parseFloat(amb.longitude), parseFloat(amb.userLat), parseFloat(amb.userLng));
-                html += `<p><strong>Distance to User:</strong> ${dist.toFixed(2)} km</p>`;
+                // Calculate and show distance if both coordinates are available
+                if (amb.latitude && amb.longitude && amb.userLat && amb.userLng) {
+                    const dist = haversine(parseFloat(amb.latitude), parseFloat(amb.longitude), parseFloat(amb.userLat), parseFloat(amb.userLng));
+                    html += `<p><strong>Distance to User:</strong> ${dist.toFixed(2)} km</p>`;
+                }
+                html += '</div>';
             }
             html += '</div>';
+            let detailsDiv = document.getElementById('ambulanceDetails');
+            if (!detailsDiv) {
+                detailsDiv = document.createElement('div');
+                detailsDiv.id = 'ambulanceDetails';
+                document.querySelector('main').appendChild(detailsDiv);
+            }
+            detailsDiv.innerHTML = html;
         }
-        html += '</div>';
-        let detailsDiv = document.getElementById('ambulanceDetails');
-        if (!detailsDiv) {
-            detailsDiv = document.createElement('div');
-            detailsDiv.id = 'ambulanceDetails';
-            document.querySelector('main').appendChild(detailsDiv);
-        }
-        detailsDiv.innerHTML = html;
-    }
     </script>
 </body>
-</html> 
+
+</html>
